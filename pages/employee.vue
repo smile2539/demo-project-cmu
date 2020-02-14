@@ -106,7 +106,7 @@
 
     computed: {
       formTitle () {
-        return this.editedIndex === -1 ? 'New Item' : 'Update Employee'
+        return this.editedIndex === -1 ? 'Add Employee' : 'Update Employee'
       },
     },
 
