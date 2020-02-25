@@ -2,7 +2,7 @@ import axios from 'axios'
 import employee from './employee.js'
 
 let instance = axios.create({
-    baseURL: 'http://dummy.restapiexample.com/api/v1/'
+    baseURL: 'https://dummy-api.cm.edu/'
 })
 
 export default {

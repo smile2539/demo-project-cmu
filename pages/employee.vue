@@ -1,13 +1,13 @@
 <template>
   <v-data-table
     :headers="headers"
-    :items="employee"
+    :items="desserts"
     sort-by="calories"
     class="elevation-1"
   >
     <template v-slot:top>
       <v-toolbar flat color="cyan darken-1">
-        <v-toolbar-title>Employee</v-toolbar-title>
+        <v-toolbar-title>Employees</v-toolbar-title>
         <v-divider
           class="mx-4"
           inset
@@ -27,17 +27,17 @@
               <v-container>
                 <v-row>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.employee_name" label="Firstname"></v-text-field>
+                    <v-text-field v-model="editedItem.firstname" label="Firstname"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.employee_salary" label="Salary"></v-text-field>
+                    <v-text-field v-model="editedItem.lastname" label="Lastname"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.employee_age" label="Age"></v-text-field>
+                    <v-text-field v-model="editedItem.birthday" label="Birthday"></v-text-field>
                   </v-col>
-                  <!-- <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.carbs" label="Email"></v-text-field>
-                  </v-col> -->
+                  <v-col cols="12" sm="6" md="6">
+                    <v-text-field v-model="editedItem.email" label="Email"></v-text-field>
+                  </v-col>
                 </v-row>
               </v-container>
             </v-card-text>
@@ -76,29 +76,30 @@
 </template>
 
 <script>
-import api  from '@/api/index'
+import api from '@/api/index'
   export default {
     data: () => ({
       dialog: false,
-      employee:[],
+      employee : [],  
       headers: [
         {
-          text: 'Id',
+          text: 'Firstname',
           align: 'left',
           sortable: false,
-          value: 'id',
+          value: 'firstname',
         },
-        { text: 'Name', value: 'employee_name' },
-        { text: 'Salary', value: 'employee_salary' },
-        { text: 'Age', value: 'employee_age' },
+        { text: 'Lastname', value: 'lastname' },
+        { text: 'Biethday', value: 'birthday' },
+        { text: 'Email', value: 'email' },
         { text: 'Operation', value: 'action', sortable: false },
       ],
       desserts: [],
       editedIndex: -1,
       editedItem: {
-        employee_name: '',
-        employee_salary: '',
-        employee_age: ''
+        firstname: '',
+        lastname: '',
+        birthday: '',
+        email: '',
       },
       defaultItem: {
         firstname: '',
@@ -121,8 +122,8 @@ import api  from '@/api/index'
     },
 
     created () {
-      // this.initialize()
-      this.getEmployee()
+      this.initialize()
+      //this.getEmployee()
     },
 
     methods: {
@@ -154,14 +155,13 @@ import api  from '@/api/index'
           },
         ]
       },
-      // update
+
       editItem (item) {
-        this.editedIndex = this.employee.indexOf(item)
+        this.editedIndex = this.desserts.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
 
-      // delete
       async deleteItem (item) {
         const index = this.employee.indexOf(item)
         if (confirm('Are you sure you want to delete this Employee?')) {
@@ -177,22 +177,30 @@ import api  from '@/api/index'
           this.editedIndex = -1
         }, 300)
       },
-
       async save () {
         if (this.editedIndex > -1) {
           Object.assign(this.employee[this.editedIndex], this.editedItem)
         } else {
           this.employee.push(this.editedItem)
           let param = {
-            name: this.editedItem.employee_name,
-            salary: this.editedItem.employee_salary,
-            age: this.editedItem.employee_age
+            firstname: this.editedItem.firstname,
+            lirstname: this.editedItem.lastname,
+            birthday: this.editedItem.birthday,
+            email: this.editedItem.email
           }
           let res = await api.employee.createEmployee(param)
           console.log('res ::', res)
         }
         this.close()
       },
+      // save () {
+      //   if (this.editedIndex > -1) {
+      //     Object.assign(this.desserts[this.editedIndex], this.editedItem)
+      //   } else {
+      //     this.desserts.push(this.editedItem)
+      //   }
+      //   this.close()
+      // },
       // showEmployee
       async getEmployee () {
         const res = await api.employee.fetchEmployee()
