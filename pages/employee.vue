@@ -1,7 +1,7 @@
 <template>
   <v-data-table
     :headers="headers"
-    :items="desserts"
+    :items="employee"
     sort-by="calories"
     class="elevation-1"
   >
@@ -27,17 +27,17 @@
               <v-container>
                 <v-row>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.name" label="Firstname"></v-text-field>
+                    <v-text-field v-model="editedItem.employee_name" label="Firstname"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.calories" label="Lastname"></v-text-field>
+                    <v-text-field v-model="editedItem.employee_salary" label="Salary"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.fat" label="Birthday"></v-text-field>
+                    <v-text-field v-model="editedItem.employee_age" label="Age"></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <!-- <v-col cols="12" sm="6" md="4">
                     <v-text-field v-model="editedItem.carbs" label="Email"></v-text-field>
-                  </v-col>
+                  </v-col> -->
                 </v-row>
               </v-container>
             </v-card-text>
@@ -52,19 +52,22 @@
       </v-toolbar>
     </template>
     <template v-slot:item.action="{ item }">
-      <v-icon
-        small
-        class="mr-2"
+      <v-btn
+        class="ma-2"
+        text
+        icon
         @click="editItem(item)"
       >
-        Update
-      </v-icon>
-      <v-icon
-        small
+        <v-icon>mdi-pencil</v-icon>
+      </v-btn>
+      <v-btn
+        class="ma-2"
+        text
+        icon
         @click="deleteItem(item)"
       >
-        Delete
-      </v-icon>
+        <v-icon>mdi-delete</v-icon>
+      </v-btn>
     </template>
     <template v-slot:no-data>
       <v-btn color="primary" @click="initialize">Reset</v-btn>
@@ -73,28 +76,29 @@
 </template>
 
 <script>
+import api  from '@/api/index'
   export default {
     data: () => ({
       dialog: false,
+      employee:[],
       headers: [
         {
-          text: 'Firstname',
+          text: 'Id',
           align: 'left',
           sortable: false,
-          value: 'firstname',
+          value: 'id',
         },
-        { text: 'Lastname', value: 'lastname' },
-        { text: 'Biethday', value: 'birthday' },
-        { text: 'Email', value: 'email' },
+        { text: 'Name', value: 'employee_name' },
+        { text: 'Salary', value: 'employee_salary' },
+        { text: 'Age', value: 'employee_age' },
         { text: 'Operation', value: 'action', sortable: false },
       ],
       desserts: [],
       editedIndex: -1,
       editedItem: {
-        firstname: '',
-        lastname: '',
-        birthday: '',
-        email: '',
+        employee_name: '',
+        employee_salary: '',
+        employee_age: ''
       },
       defaultItem: {
         firstname: '',
@@ -117,7 +121,8 @@
     },
 
     created () {
-      this.initialize()
+      // this.initialize()
+      this.getEmployee()
     },
 
     methods: {
@@ -149,16 +154,20 @@
           },
         ]
       },
-
+      // update
       editItem (item) {
-        this.editedIndex = this.desserts.indexOf(item)
+        this.editedIndex = this.employee.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
 
-      deleteItem (item) {
-        const index = this.desserts.indexOf(item)
-        confirm('Are you sure you want to delete this Employee?') && this.desserts.splice(index, 1)
+      // delete
+      async deleteItem (item) {
+        const index = this.employee.indexOf(item)
+        if (confirm('Are you sure you want to delete this Employee?')) {
+          this.employee.splice(index, 1)
+          let res = await api.employee.deleteEmployee(this.employee[index].id)
+        }
       },
 
       close () {
@@ -169,13 +178,26 @@
         }, 300)
       },
 
-      save () {
+      async save () {
         if (this.editedIndex > -1) {
-          Object.assign(this.desserts[this.editedIndex], this.editedItem)
+          Object.assign(this.employee[this.editedIndex], this.editedItem)
         } else {
-          this.desserts.push(this.editedItem)
+          this.employee.push(this.editedItem)
+          let param = {
+            name: this.editedItem.employee_name,
+            salary: this.editedItem.employee_salary,
+            age: this.editedItem.employee_age
+          }
+          let res = await api.employee.createEmployee(param)
+          console.log('res ::', res)
         }
         this.close()
+      },
+      // showEmployee
+      async getEmployee () {
+        const res = await api.employee.fetchEmployee()
+        this.employee = res.data
+        console.log(this.employee)
       },
     },
   }
